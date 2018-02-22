@@ -2,8 +2,8 @@
 <ul>
   @foreach(var item in Model)
  {
-   <li><a href='/items/@item.GetId()'>@item.GetDescription()</a></li>
-   <h4>@item.GetDescription() | <a href="/items/@item.GetId()/update">Edit</a></h4>
+   @*<li><a href='/items/@item.GetId()'>@item.GetDescription()</a></li>*@
+   <li>@item.GetDescription() | <a href="/items/@item.GetId()/update">Edit</a> | <a method="post" href="/items/@item.GetId()/delete">Delete</a></li>
  }
 </ul>
 <p><a href="/items/new">Add new item</a></p>

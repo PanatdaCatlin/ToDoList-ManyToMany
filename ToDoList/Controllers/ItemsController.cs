@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using ToDoList.Models;
 using System.Collections.Generic;
+using System;
 
 namespace ToDoList.Controllers
 {
     public class ItemsController : Controller
     {
-
+//need?
         [HttpGet("/categories/{categoryId}/items/new")]
         public ActionResult CreateForm(int categoryId)
         {
@@ -14,6 +15,7 @@ namespace ToDoList.Controllers
           Category category = Category.Find(categoryId);
           return View(category);
         }
+//need?
         [HttpGet("/categories/{categoryId}/items/{itemId}")]
         public ActionResult Details(int categoryId, int itemId)
         {
@@ -30,6 +32,7 @@ namespace ToDoList.Controllers
             List<Item> allItems = Item.GetAll();
             return View(allItems);
         }
+//need?
         [HttpGet("/items/new")]
         public ActionResult CreateForm()
         {
@@ -38,18 +41,26 @@ namespace ToDoList.Controllers
         [HttpPost("/items")]
         public ActionResult Create()
         {
-          Item newItem = new Item (Request.Form["new-item"]);
+          Item newItem = new Item (Request.Form["item-description"],Int32.Parse(Request.Form["category-id"]));
           newItem.Save();
           List<Item> allItems = Item.GetAll();
           return RedirectToAction("Index");
         }
-        [HttpPost("/items/delete")]
-        public ActionResult DeleteAll(int id)
+        // [HttpPost("/items/delete")]
+        // public ActionResult DeleteAll(int id)
+        // {
+        //   Item thisItem = Item.Find(id);
+        //   thisItem.Delete();
+        //   return RedirectToAction("Index");
+        // }
+        [HttpGet("/items/{id}/delete")]
+        public ActionResult DeleteOne(int id)
         {
           Item thisItem = Item.Find(id);
           thisItem.Delete();
-          return RedirectToAction("Index");
+          return RedirectToAction("details");
         }
+//need?
         [HttpGet("/items/{id}")]
         public ActionResult Details(int id)
         {
@@ -60,7 +71,7 @@ namespace ToDoList.Controllers
         public ActionResult UpdateForm(int id)
         {
             Item thisItem = Item.Find(id);
-            return View(thisItem);
+            return View("update", thisItem);
         }
         [HttpPost("/items/{id}/update")]
         public ActionResult Update(int id)

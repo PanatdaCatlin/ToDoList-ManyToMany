@@ -16,6 +16,7 @@ namespace ToDoList.Tests
     public void Dispose()
     {
       Item.DeleteAll();
+      Category.DeleteAll();
     }
     [TestMethod]
     public void GetDescription_ReturnsDescription_String()
@@ -31,7 +32,6 @@ namespace ToDoList.Tests
       Assert.AreEqual(description, result);
     }
 
-// failed because the change in GETALL()????????
     [TestMethod]
     public void GetAll_ReturnsItems_ItemList()
     {
@@ -39,7 +39,9 @@ namespace ToDoList.Tests
       string description01 = "Walk the dog";
       string description02 = "Wash the dishes";
       Item newItem1 = new Item(description01);
+      newItem1.Save();
       Item newItem2 = new Item(description02);
+      newItem2.Save();
       List<Item> newList = new List<Item> { newItem1, newItem2 };
 
       //Act
@@ -62,25 +64,12 @@ namespace ToDoList.Tests
       //Assert
       Assert.AreEqual(0, result);
     }
-// was this rewritten below? or are both supposed to be passing?
-    // [TestMethod]
-    // public void Save_SavesToDatabase_ItemList()
-    // {
-    //   //Arrange
-    //   Item testItem = new Item("Mow the lawn");
-    //
-    //   //Act
-    //   int result = Item.GetAll().Count;
-    //
-    //   //Assert
-    //   Assert.AreEqual(0, result);
-    // }
     [TestMethod]
     public void Equals_ReturnsTrueIfDescriptionsAreTheSame_Item()
     {
       // Arrange, Act
-      Item firstItem = new Item("Mow the lawn");
-      Item secondItem = new Item("Mow the lawn");
+      Item firstItem = new Item("Mow the lawn",1);
+      Item secondItem = new Item("Mow the lawn",1);
 
       // Assert
       Assert.AreEqual(firstItem, secondItem);
@@ -89,7 +78,7 @@ namespace ToDoList.Tests
     public void Save_SavesToDatabase_ItemList()
     {
       //Arrange
-      Item testItem = new Item("Mow the lawn");
+      Item testItem = new Item("Mow the lawn",1);
 
       //Act
       testItem.Save();
@@ -103,7 +92,7 @@ namespace ToDoList.Tests
     public void Save_AssignsIdToObject_Id()
     {
       //Arrange
-      Item testItem = new Item("Mow the lawn");
+      Item testItem = new Item("Mow the lawn",1);
 
       //Act
       testItem.Save();
@@ -119,7 +108,7 @@ namespace ToDoList.Tests
     public void Find_FindsItemInDatabase_Item()
     {
       //Arrange
-      Item testItem = new Item("Mow the lawn");
+      Item testItem = new Item("Mow the lawn",1);
       testItem.Save();
 
       //Act
@@ -132,8 +121,8 @@ namespace ToDoList.Tests
     public void Edit_UpdatesItemInDatabase_String()
     {
       //Arrange
-      string firstDescription = "Walk the Dog";
-      Item testItem = new Item(firstDescription, 1);
+      Item testItem = new Item ("Walk the Dog", 1,1);
+      // Item testItem = new Item(firstDescription, 1);
       testItem.Save();
       string secondDescription = "Mow the lawn";
 
@@ -144,6 +133,24 @@ namespace ToDoList.Tests
 
       //Assert
       Assert.AreEqual(secondDescription , result);
+    }
+    [TestMethod]
+    public void Delete_DeletesItemInDatabase_Void()
+    {
+      //Arrange
+      string firstDescription = "Walk the Dog";
+      Item testItem = new Item(firstDescription,1,2);
+      testItem.Save();
+      string secondDescription = "Mow the lawn";
+      Item testItem2 = new Item(secondDescription,1,3);
+      testItem2.Save();
+      //Act
+      testItem.Delete();
+      List<Item> expected = new List<Item> {testItem2};
+      List<Item> result = Item.GetAll();
+
+      //Assert
+      CollectionAssert.AreEqual(expected, result);
     }
   }
 }

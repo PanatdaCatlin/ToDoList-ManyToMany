@@ -7,18 +7,14 @@ namespace ToDoList.Models
   public class Item
   {
     private string _description;
+    private int _categoryId;
     private int _id;
-//Do i need this anymore? was it replaced with the database?
-    private static List<Item> _instances = new List<Item> {};
 
-    public Item (string Description, int Id = 0)
+    public Item (string Description, int CategoryId = 0, int Id = 0)
     {
       _id = Id;
       _description = Description;
-//Do i need this anymore? was it replaced with the database?
-      // _instances.Add(this);
-      // _id = _instances.Count;
-
+      _categoryId = CategoryId;
     }
     public override bool Equals(System.Object otherItem)
     {
@@ -31,8 +27,13 @@ namespace ToDoList.Models
         Item newItem = (Item) otherItem;
         bool idEquality = (this.GetId() == newItem.GetId());
         bool descriptionEquality = (this.GetDescription() == newItem.GetDescription());
+        bool categoryEquality = this.GetCategoryId() == newItem.GetCategoryId();
         return (idEquality && descriptionEquality);
       }
+    }
+    public override int GetHashCode()
+    {
+         return this.GetDescription().GetHashCode();
     }
     public string GetDescription()
     {
@@ -46,6 +47,10 @@ namespace ToDoList.Models
     {
       return _id;
     }
+    public int GetCategoryId()
+    {
+        return _categoryId;
+    }
     public static List<Item> GetAll()
     {
       List<Item> allItems = new List<Item> {};
@@ -58,7 +63,9 @@ namespace ToDoList.Models
       {
         int itemId = rdr.GetInt32(0);
         string itemDescription = rdr.GetString(1);
-        Item newItem = new Item(itemDescription, itemId);
+        int itemCategoryId = rdr.GetInt32(2);
+
+        Item newItem = new Item(itemDescription, itemCategoryId, itemId);
         allItems.Add(newItem);
       }
       conn.Close();
@@ -67,12 +74,6 @@ namespace ToDoList.Models
         conn.Dispose();
       }
       return allItems;
-    }
-
-  //do i need this if I am creating a delete function??
-    public static void ClearAll()
-    {
-      _instances.Clear();
     }
     public static Item Find(int id)
     {
@@ -90,14 +91,16 @@ namespace ToDoList.Models
 
       int itemId = 0;
       string itemDescription = "";
+      int itemCategoryId = 0;
 
       while (rdr.Read())
       {
           itemId = rdr.GetInt32(0);
           itemDescription = rdr.GetString(1);
+          itemCategoryId = rdr.GetInt32(2);
       }
 
-      Item foundItem= new Item(itemDescription, itemId);
+      Item foundItem= new Item(itemDescription, itemCategoryId, itemId);
 
       conn.Close();
       if (conn != null)
@@ -122,14 +125,18 @@ namespace ToDoList.Models
          conn.Dispose();
      }
    }
-//deleting one item
-   public static void Delete()
+   public void Delete()
   {
     MySqlConnection conn = DB.Connection();
     conn.Open();
 
     var cmd = conn.CreateCommand() as MySqlCommand;
     cmd.CommandText = @"DELETE FROM items WHERE id = @thisId;";
+
+    MySqlParameter deleteId = new MySqlParameter();
+    deleteId.ParameterName = "@thisId";
+    deleteId.Value = _id;
+    cmd.Parameters.Add(deleteId);
 
     cmd.ExecuteNonQuery();
 
@@ -145,16 +152,20 @@ namespace ToDoList.Models
      conn.Open();
 
      var cmd = conn.CreateCommand() as MySqlCommand;
-     cmd.CommandText = @"INSERT INTO `items` (`description`) VALUES (@ItemDescription);";
+     cmd.CommandText = @"INSERT INTO `items` (`description`,`category_id`) VALUES (@ItemDescription, @category_id);";
 
      MySqlParameter description = new MySqlParameter();
      description.ParameterName = "@ItemDescription";
      description.Value = this._description;
      cmd.Parameters.Add(description);
 
+     MySqlParameter categoryId = new MySqlParameter();
+     categoryId.ParameterName = "@category_id";
+     categoryId.Value = this._categoryId;
+     cmd.Parameters.Add(categoryId);
+
      cmd.ExecuteNonQuery();
      _id = (int) cmd.LastInsertedId;
-
 
       conn.Close();
       if (conn != null)
