@@ -8,15 +8,31 @@ namespace ToDoList.Models
   {
     private string _description;
     private int _id;
+//Do i need this anymore? was it replaced with the database?
     private static List<Item> _instances = new List<Item> {};
 
     public Item (string Description, int Id = 0)
     {
       _id = Id;
       _description = Description;
+//Do i need this anymore? was it replaced with the database?
       // _instances.Add(this);
       // _id = _instances.Count;
 
+    }
+    public override bool Equals(System.Object otherItem)
+    {
+      if (!(otherItem is Item))
+      {
+        return false;
+      }
+      else
+      {
+        Item newItem = (Item) otherItem;
+        bool idEquality = (this.GetId() == newItem.GetId());
+        bool descriptionEquality = (this.GetDescription() == newItem.GetDescription());
+        return (idEquality && descriptionEquality);
+      }
     }
     public string GetDescription()
     {
@@ -52,13 +68,125 @@ namespace ToDoList.Models
       }
       return allItems;
     }
+
+  //do i need this if I am creating a delete function??
     public static void ClearAll()
     {
       _instances.Clear();
     }
-    public static Item Find(int searchId)
+    public static Item Find(int id)
     {
-      return _instances [searchId-1];
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM `items` WHERE id = @thisId;";
+
+      MySqlParameter thisId = new MySqlParameter();
+      thisId.ParameterName = "@thisId";
+      thisId.Value = id;
+      cmd.Parameters.Add(thisId);
+
+      var rdr = cmd.ExecuteReader() as MySqlDataReader;
+
+      int itemId = 0;
+      string itemDescription = "";
+
+      while (rdr.Read())
+      {
+          itemId = rdr.GetInt32(0);
+          itemDescription = rdr.GetString(1);
+      }
+
+      Item foundItem= new Item(itemDescription, itemId);
+
+      conn.Close();
+      if (conn != null)
+      {
+          conn.Dispose();
+      }
+      return foundItem;
+    }
+    public static void DeleteAll()
+   {
+     MySqlConnection conn = DB.Connection();
+     conn.Open();
+
+     var cmd = conn.CreateCommand() as MySqlCommand;
+     cmd.CommandText = @"DELETE FROM items;";
+
+     cmd.ExecuteNonQuery();
+
+     conn.Close();
+     if (conn != null)
+     {
+         conn.Dispose();
+     }
+   }
+//deleting one item
+   public static void Delete()
+  {
+    MySqlConnection conn = DB.Connection();
+    conn.Open();
+
+    var cmd = conn.CreateCommand() as MySqlCommand;
+    cmd.CommandText = @"DELETE FROM items WHERE id = @thisId;";
+
+    cmd.ExecuteNonQuery();
+
+    conn.Close();
+    if (conn != null)
+    {
+        conn.Dispose();
+    }
+  }
+   public void Save()
+    {
+      MySqlConnection conn = DB.Connection();
+     conn.Open();
+
+     var cmd = conn.CreateCommand() as MySqlCommand;
+     cmd.CommandText = @"INSERT INTO `items` (`description`) VALUES (@ItemDescription);";
+
+     MySqlParameter description = new MySqlParameter();
+     description.ParameterName = "@ItemDescription";
+     description.Value = this._description;
+     cmd.Parameters.Add(description);
+
+     cmd.ExecuteNonQuery();
+     _id = (int) cmd.LastInsertedId;
+
+
+      conn.Close();
+      if (conn != null)
+      {
+          conn.Dispose();
+      }
+    }
+    public void Edit(string newDescription)
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"UPDATE items SET description = @newDescription WHERE id = @searchId;";
+
+      MySqlParameter searchId = new MySqlParameter();
+      searchId.ParameterName = "@searchId";
+      searchId.Value = _id;
+      cmd.Parameters.Add(searchId);
+
+      MySqlParameter description = new MySqlParameter();
+      description.ParameterName = "@newDescription";
+      description.Value = newDescription;
+      cmd.Parameters.Add(description);
+
+      cmd.ExecuteNonQuery();
+      _description = newDescription;
+
+      conn.Close();
+      if (conn != null)
+      {
+          conn.Dispose();
+      }
     }
   }
 }

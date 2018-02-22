@@ -3,6 +3,7 @@
   @foreach(var item in Model)
  {
    <li><a href='/items/@item.GetId()'>@item.GetDescription()</a></li>
+   <h4>@item.GetDescription() | <a href="/items/@item.GetId()/update">Edit</a></h4>
  }
 </ul>
 <p><a href="/items/new">Add new item</a></p>
