@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ToDoList.Models;
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 using System;
 
 namespace ToDoList.Tests
@@ -21,6 +22,8 @@ namespace ToDoList.Tests
       //Assert
       Assert.AreEqual(description, result);
     }
+
+    // failed because the change in GETALL()????????
     [TestMethod]
     public void GetAll_ReturnsItems_ItemList()
     {
