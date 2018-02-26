@@ -13,5 +13,11 @@ namespace ToDoList.Controllers
         {
             return View();
         }
+
+        [HttpGet("/Home/Success")]
+        public ActionResult Success()
+        {
+            return View();
+        }
     }
 }
