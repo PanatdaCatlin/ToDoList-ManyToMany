@@ -1,5 +1,9 @@
 @using ToDoList.Models;
+@{
+  Layout = "_Layout";
+}
 
+<div class="container">
 <h1>To Do List</h1>
 <h2>Item: @Model["item"].GetDescription()</h2>
 <hr />
@@ -25,3 +29,4 @@
   <button type='submit'>Add</button>
 </form>
 <p><a href="/">Return to Main Page</a></p>
+</div>
